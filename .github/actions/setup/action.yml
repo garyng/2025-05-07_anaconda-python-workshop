@@ -1,0 +1,21 @@
+name: setup python env
+description: setup python environment
+runs:
+  using: composite
+  steps:
+    - name: setup python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.13'
+
+    - name: install poetry
+      uses: abatilo/actions-poetry@v4
+
+    - name: cache venv
+      uses: actions/cache@v3
+      with:
+        path: ./.venv
+        key: venv-${{ hashFiles('poetry.lock') }}
+
+    - name: install project deps
+      run: poetry install
