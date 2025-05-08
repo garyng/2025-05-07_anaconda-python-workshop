@@ -16,4 +16,5 @@ def test_e2e_can_load_csv_fund_report(request):
     # save_result_as_spec_csv(request.node.name, results)
     expected = load_spec_from_csv(request.node.name)
 
-    assert_frame_equal(results, expected)
+    sortby = ["Symbol", "FundName", "ReportDate"]
+    assert_frame_equal(results.sort(*sortby), expected.sort(*sortby))
