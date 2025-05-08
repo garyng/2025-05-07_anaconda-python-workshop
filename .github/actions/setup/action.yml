@@ -18,4 +18,5 @@ runs:
         key: venv-${{ hashFiles('poetry.lock') }}
 
     - name: install project deps
+      shell: bash
       run: poetry install

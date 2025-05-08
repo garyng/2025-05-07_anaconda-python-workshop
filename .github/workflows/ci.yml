@@ -16,4 +16,5 @@ jobs:
         uses: ./.github/actions/setup
 
       - name: run test
+        shell: bash
         run: poetry run pytest -v
