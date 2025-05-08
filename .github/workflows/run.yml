@@ -16,7 +16,7 @@ jobs:
       
       - name: run
         shell: bash
-        run: poetry python ./src/main.py
+        run: poetry run python ./src/main.py
 
       - name: upload outputs
         uses: actions/upload-artifact@v4
