@@ -1,15 +1,16 @@
-from datetime import date
 import pathlib
+from datetime import date
+
+import polars as pl
+import pytest
+
 from loader import (
     RawReportSchema,
     get_csv_files_from_directory,
     load_csv_files,
     parse_csv_filename,
 )
-import pytest
-import polars as pl
-
-test_data_dir_path = pathlib.Path.cwd() / "data" / "external-funds"
+from test import test_data_dir_path
 
 
 def test_can_get_csv_file_paths():

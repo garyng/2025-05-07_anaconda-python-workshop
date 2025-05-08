@@ -1,18 +1,22 @@
+import os
+import pathlib
 from abc import ABC, abstractmethod
 from collections import OrderedDict
 from datetime import date
-import os
-import pathlib
-from pydantic import BaseModel
-import polars as pl
+from typing import Generic, TypeVar
+
 import pandera.polars as pa
 import pandera.typing.polars as pat
+import polars as pl
 import polars.testing.parametric as plt
+from pydantic import BaseModel
+
+T = TypeVar("T")
 
 
-class ReportLoader(ABC):
+class ReportLoader(ABC, Generic[T]):
     @abstractmethod
-    def execute(self):
+    def execute(self) -> Generic[T]:
         pass
 
 
@@ -142,14 +146,22 @@ def parse_csv_filename(
     return RawReportSchema_ParsedFilename.validate(results)
 
 
-class ReportSchema(RawReportSchema_ParsedFilename):
-    @classmethod
-    def to_schema(cls) -> pa.DataFrameSchema:
-        schema = super().to_schema()
-        return schema.remove_columns(["FinancialType"])
+class ReportSchema(pa.DataFrameModel):
+    class Config:
+        strict = "filter"
+
+    Symbol: str
+    SecurityName: str
+    Price: float
+    Quantity: float
+    RealizedPnl: float
+    MarketValue: float
+
+    FundName: str
+    ReportDate: date
 
 
-def filter(
+def filter_only_equities(
     data: pat.DataFrame[RawReportSchema_ParsedFilename],
 ) -> pat.DataFrame[ReportSchema]:
     results = data.filter(pl.col("FinancialType").eq(pl.lit("Equities")))
@@ -157,12 +169,17 @@ def filter(
     return ReportSchema.validate(results)
 
 
-class FundCsvDirectoryReportLoader(ReportLoader):
+class FundCsvDirectoryReportLoader(ReportLoader[pat.DataFrame[ReportSchema]]):
     class Config(BaseModel):
         directory_path: str
 
     def __init__(self, config: Config):
         self.config = config
 
-    def execute(self):
-        raise NotImplementedError
+    def execute(self) -> pat.DataFrame[ReportSchema]:
+        csv_file_paths = get_csv_files_from_directory(self.config.directory_path)
+        raw_data = load_csv_files(files=csv_file_paths)
+        raw_data = parse_csv_filename(data=raw_data)
+        data = filter_only_equities(data=raw_data)
+
+        return data

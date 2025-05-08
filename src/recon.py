@@ -1,9 +1,11 @@
-from datetime import date
 import sqlite3
-from loader import ReportSchema
-import polars as pl
+from datetime import date
+
 import pandera.polars as pa
 import pandera.typing.polars as pat
+import polars as pl
+
+from loader import ReportSchema
 
 
 def connect_db(db_path: str) -> sqlite3.Connection:
