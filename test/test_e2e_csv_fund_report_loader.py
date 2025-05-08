@@ -1,8 +1,6 @@
-from polars.testing import assert_frame_equal
-
 from config import load_app_config
 from loader import FundCsvDirectoryReportLoader
-from test import load_spec_from_csv, test_data_dir_path
+from test import load_spec_from_csv, sort_then_assert_frame_equal, test_data_dir_path
 
 
 def test_e2e_can_load_csv_fund_report(request):
@@ -16,5 +14,6 @@ def test_e2e_can_load_csv_fund_report(request):
     # save_result_as_spec_csv(request.node.name, results)
     expected = load_spec_from_csv(request.node.name)
 
-    sortby = ["Symbol", "FundName", "ReportDate"]
-    assert_frame_equal(results.sort(*sortby), expected.sort(*sortby))
+    sort_then_assert_frame_equal(
+        ["Symbol", "FundName", "ReportDate"], results, expected
+    )

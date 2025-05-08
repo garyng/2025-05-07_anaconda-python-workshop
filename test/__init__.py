@@ -2,6 +2,7 @@ import pathlib
 
 import pandera.typing.polars as pat
 import polars as pl
+from polars.testing import assert_frame_equal
 
 from loader import FundCsvDirectoryReportLoader, FundReportSchema
 
@@ -28,3 +29,11 @@ def load_test_fund_report_data() -> pat.DataFrame[FundReportSchema]:
     loader = FundCsvDirectoryReportLoader(config)
     results = loader.execute()
     return results
+
+
+def sort_then_assert_frame_equal(sort_by: list[str], left: pl.DataFrame | pl.LazyFrame, right: pl.DataFrame | pl.LazyFrame):
+    assert_frame_equal(
+        left=left.sort(*sort_by),
+        right=right.sort(*sort_by),
+        check_row_order=False, check_column_order=False
+    )
