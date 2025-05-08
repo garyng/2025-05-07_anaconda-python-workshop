@@ -8,14 +8,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: checkout
         uses: actions/checkout@v3
 
       - name: setup
         uses: ./.github/actions/setup
       
       - name: run
-        run: python ./src/main.py
+        shell: bash
+        run: poetry run python ./src/main.py
 
       - name: upload outputs
         uses: actions/upload-artifact@v4
