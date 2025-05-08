@@ -5,7 +5,7 @@ import polars as pl
 import pytest
 
 from loader import (
-    RawReportSchema,
+    RawFundReportSchema,
     get_csv_files_from_directory,
     load_csv_files,
     parse_csv_filename,
@@ -74,7 +74,7 @@ def test_can_load_csv_files(file_paths: list[pathlib.Path]):
     ],
 )
 def test_can_parse_filenames(filename, expected):
-    data = RawReportSchema.one_test_data().with_columns(Filename=pl.lit(filename))
+    data = RawFundReportSchema.one_test_data().with_columns(Filename=pl.lit(filename))
     result = parse_csv_filename(data)
 
     assert result["FundName"].to_list() == [expected["FundName"]]

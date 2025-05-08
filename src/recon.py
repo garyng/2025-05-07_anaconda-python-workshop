@@ -5,7 +5,7 @@ import pandera.polars as pa
 import pandera.typing.polars as pat
 import polars as pl
 
-from loader import ReportSchema
+from loader import FundReportSchema
 
 
 def connect_db(db_path: str) -> sqlite3.Connection:

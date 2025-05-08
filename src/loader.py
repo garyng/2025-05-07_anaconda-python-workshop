@@ -14,7 +14,7 @@ from pydantic import BaseModel
 T = TypeVar("T")
 
 
-class ReportLoader(ABC, Generic[T]):
+class FundReportLoader(ABC, Generic[T]):
     @abstractmethod
     def execute(self) -> Generic[T]:
         pass
@@ -26,7 +26,7 @@ def get_csv_files_from_directory(dir_path: str) -> list[pathlib.Path]:
     ]
 
 
-class RawReportSchema(pa.DataFrameModel):
+class RawFundReportSchema(pa.DataFrameModel):
     class Config:
         strict = "filter"
 
@@ -54,7 +54,7 @@ class RawReportSchema(pa.DataFrameModel):
         )
 
     @staticmethod
-    def one_test_data() -> pat.DataFrame["RawReportSchema"]:
+    def one_test_data() -> pat.DataFrame["RawFundReportSchema"]:
         dfs = plt.dataframes(
             [
                 plt.column("FinancialType", dtype=pl.String),
@@ -73,12 +73,12 @@ class RawReportSchema(pa.DataFrameModel):
         return dfs.example()
 
 
-def load_csv_files(files: list[pathlib.Path]) -> pat.DataFrame[RawReportSchema]:
+def load_csv_files(files: list[pathlib.Path]) -> pat.DataFrame[RawFundReportSchema]:
     results = [
         pl.read_csv(
             path,
-            columns=list(RawReportSchema.csv_mappings().values()),
-            new_columns=list(RawReportSchema.csv_mappings().keys()),
+            columns=list(RawFundReportSchema.csv_mappings().values()),
+            new_columns=list(RawFundReportSchema.csv_mappings().keys()),
         ).with_columns(Filename=pl.lit(path.stem))
         for path in files
         if path.exists()
@@ -88,10 +88,10 @@ def load_csv_files(files: list[pathlib.Path]) -> pat.DataFrame[RawReportSchema]:
         return None
 
     result = pl.concat(results)
-    return RawReportSchema.validate(result)
+    return RawFundReportSchema.validate(result)
 
 
-class RawReportSchema_ParsedFilename(RawReportSchema):
+class RawFundReportSchema_ParsedFilename(RawFundReportSchema):
     FundName: str
     ReportDate: date
 
@@ -101,10 +101,10 @@ class RawReportSchema_ParsedFilename(RawReportSchema):
         return schema.remove_columns(["Filename"])
 
 
-@pa.check_output(RawReportSchema_ParsedFilename)
+@pa.check_output(RawFundReportSchema_ParsedFilename)
 def parse_csv_filename(
-    data: pat.DataFrame[RawReportSchema],
-) -> pat.DataFrame[RawReportSchema_ParsedFilename]:
+    data: pat.DataFrame[RawFundReportSchema],
+) -> pat.DataFrame[RawFundReportSchema_ParsedFilename]:
     parsed = (
         data.with_columns(
             ParsedFilename=pl.col(
@@ -147,7 +147,7 @@ def parse_csv_filename(
     return results
 
 
-class ReportSchema(pa.DataFrameModel):
+class FundReportSchema(pa.DataFrameModel):
     class Config:
         strict = "filter"
 
@@ -162,25 +162,25 @@ class ReportSchema(pa.DataFrameModel):
     ReportDate: date
 
 
-@pa.check_output(ReportSchema)
+@pa.check_output(FundReportSchema)
 def filter_only_equities(
-    data: pat.DataFrame[RawReportSchema_ParsedFilename],
-) -> pat.DataFrame[ReportSchema]:
+    data: pat.DataFrame[RawFundReportSchema_ParsedFilename],
+) -> pat.DataFrame[FundReportSchema]:
     results = data.filter(pl.col("FinancialType").eq(pl.lit("Equities")))
 
     return results
 
 
-@pa.check_output(ReportSchema)
+@pa.check_output(FundReportSchema)
 def map_fund_names(
-    data: pat.DataFrame[RawReportSchema_ParsedFilename],
+    data: pat.DataFrame[RawFundReportSchema_ParsedFilename],
     fund_name_mappings: dict[str, str],
-) -> pat.DataFrame[ReportSchema]:
+) -> pat.DataFrame[FundReportSchema]:
     results = data.with_columns(FundName=pl.col("FundName").replace(fund_name_mappings))
     return results
 
 
-class FundCsvDirectoryReportLoader(ReportLoader[pat.DataFrame[ReportSchema]]):
+class FundCsvDirectoryReportLoader(FundReportLoader[pat.DataFrame[FundReportSchema]]):
     class Config(BaseModel):
         directory_path: str
         fund_name_mappings: dict[str, str]
@@ -188,10 +188,12 @@ class FundCsvDirectoryReportLoader(ReportLoader[pat.DataFrame[ReportSchema]]):
     def __init__(self, config: Config):
         self.config = config
 
-    def execute(self) -> pat.DataFrame[ReportSchema]:
+    def execute(self) -> pat.DataFrame[FundReportSchema]:
         csv_file_paths = get_csv_files_from_directory(self.config.directory_path)
         raw_data = load_csv_files(files=csv_file_paths)
         raw_data = parse_csv_filename(data=raw_data)
-        data = map_fund_names(filter_only_equities(data=raw_data), self.config.fund_name_mappings)
+        data = map_fund_names(
+            filter_only_equities(data=raw_data), self.config.fund_name_mappings
+        )
 
         return data
