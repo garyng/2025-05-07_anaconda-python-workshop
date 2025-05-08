@@ -10,6 +10,7 @@ dependencies = [
     "pydantic (>=2.11.4,<3.0.0)",
     "pandera[polars] (>=0.23.1,<0.24.0)",
     "hypothesis (>=6.131.14,<7.0.0)",
+    "xlsxwriter (>=3.2.3,<4.0.0)",
 ]
 
 [build-system]
