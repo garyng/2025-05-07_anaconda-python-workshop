@@ -1,0 +1,19 @@
+[project]
+name = "workshop"
+version = "0.1.0"
+description = ""
+authors = [{ name = "Gary Ng", email = "garyngzb@gmail.com" }]
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = ["polars (>=1.29.0,<2.0.0)"]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+notebook = "^7.4.2"
+pytest = "^8.3.5"
+
+[tool.poetry]
+packages = [{ include = "*", from = "src" }]
