@@ -101,6 +101,7 @@ class RawReportSchema_ParsedFilename(RawReportSchema):
         return schema.remove_columns(["Filename"])
 
 
+@pa.check_output(RawReportSchema_ParsedFilename)
 def parse_csv_filename(
     data: pat.DataFrame[RawReportSchema],
 ) -> pat.DataFrame[RawReportSchema_ParsedFilename]:
@@ -143,7 +144,7 @@ def parse_csv_filename(
         )
     ).drop("ReportDateStr")
 
-    return RawReportSchema_ParsedFilename.validate(results)
+    return results
 
 
 class ReportSchema(pa.DataFrameModel):
@@ -161,17 +162,28 @@ class ReportSchema(pa.DataFrameModel):
     ReportDate: date
 
 
+@pa.check_output(ReportSchema)
 def filter_only_equities(
     data: pat.DataFrame[RawReportSchema_ParsedFilename],
 ) -> pat.DataFrame[ReportSchema]:
     results = data.filter(pl.col("FinancialType").eq(pl.lit("Equities")))
 
-    return ReportSchema.validate(results)
+    return results
+
+
+@pa.check_output(ReportSchema)
+def map_fund_names(
+    data: pat.DataFrame[RawReportSchema_ParsedFilename],
+    fund_name_mappings: dict[str, str],
+) -> pat.DataFrame[ReportSchema]:
+    results = data.with_columns(FundName=pl.col("FundName").replace(fund_name_mappings))
+    return results
 
 
 class FundCsvDirectoryReportLoader(ReportLoader[pat.DataFrame[ReportSchema]]):
     class Config(BaseModel):
         directory_path: str
+        fund_name_mappings: dict[str, str]
 
     def __init__(self, config: Config):
         self.config = config
@@ -180,6 +192,6 @@ class FundCsvDirectoryReportLoader(ReportLoader[pat.DataFrame[ReportSchema]]):
         csv_file_paths = get_csv_files_from_directory(self.config.directory_path)
         raw_data = load_csv_files(files=csv_file_paths)
         raw_data = parse_csv_filename(data=raw_data)
-        data = filter_only_equities(data=raw_data)
+        data = map_fund_names(filter_only_equities(data=raw_data), self.config.fund_name_mappings)
 
         return data
