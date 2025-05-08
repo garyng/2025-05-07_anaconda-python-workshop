@@ -1,0 +1,24 @@
+name: run
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: setup
+        uses: ./.github/actions/setup
+      
+      - name: run
+        run: python ./src/main.py
+
+      - name: upload outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: outputs
+          path: ./output/
