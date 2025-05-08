@@ -1,18 +1,14 @@
 import sqlite3
-from abc import ABC
 from datetime import date
-from typing import Generic, TypeVar
 
 import pandera.polars as pa
 import pandera.typing.polars as pat
 import polars as pl
 from pydantic import BaseModel
 
+from db import connect_db
 from loader import FundReportSchema
-
-
-def connect_db(db_path: str) -> sqlite3.Connection:
-    return sqlite3.connect(db_path)
+from reports import ReportGenerator
 
 
 class EquityPriceSchema(pa.DataFrameModel):
@@ -73,17 +69,8 @@ def recon_ref_with_reports(
     return EquityReconReportSchema.validate(results)
 
 
-TFundReport = TypeVar("T")
-UReconReport = TypeVar("U")
-
-
-class ReconReportGenerator(ABC, Generic[TFundReport, UReconReport]):
-    def generate(self, report_data: TFundReport) -> UReconReport:
-        pass
-
-
 class EquityPriceReconReportGenerator(
-    ReconReportGenerator[
+    ReportGenerator[
         pat.DataFrame[FundReportSchema], pat.DataFrame[EquityReconReportSchema]
     ]
 ):
@@ -94,9 +81,9 @@ class EquityPriceReconReportGenerator(
         self.config = config
 
     def generate(
-        self, report_data: pat.DataFrame[FundReportSchema]
+        self, fund_report_data: pat.DataFrame[FundReportSchema]
     ) -> pat.DataFrame[EquityReconReportSchema]:
         db = connect_db(self.config.connection_string)
         ref_data = load_equity_prices_from_db(conn=db)
-        results = recon_ref_with_reports(ref_data=ref_data, report_data=report_data)
+        results = recon_ref_with_reports(ref_data=ref_data, report_data=fund_report_data)
         return results

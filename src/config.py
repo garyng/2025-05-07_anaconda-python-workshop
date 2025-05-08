@@ -8,6 +8,7 @@ class AppConfig(BaseModel):
     FundReportsDirPath: str
     RefDbConnectionString: str
     ReconReportOutputPath: str
+    TopFundReportOutputPath: str
 
 
 def load_app_config() -> AppConfig:

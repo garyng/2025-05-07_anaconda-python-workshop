@@ -8,5 +8,6 @@
     },
     "FundReportsDirPath": "./data/external-funds/",
     "RefDbConnectionString": "./db/testdb.sqlite",
-    "ReconReportOutputPath": "./output/recon.csv"
+    "ReconReportOutputPath": "./output/recon.csv",
+    "TopFundReportOutputPath": "./output/top_fund.csv"
 }

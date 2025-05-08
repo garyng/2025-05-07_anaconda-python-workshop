@@ -1,19 +1,7 @@
-import pandera.typing.polars as pat
 from polars.testing import assert_frame_equal
 
-from loader import FundCsvDirectoryReportLoader, FundReportSchema
-from recon import EquityPriceReconReportGenerator
-from test import load_spec_from_csv, test_data_dir_path, test_db_path
-
-
-def load_test_fund_report_data() -> pat.DataFrame[FundReportSchema]:
-    config = FundCsvDirectoryReportLoader.Config(
-        directory_path=str(test_data_dir_path),
-        fund_name_mappings={},
-    )
-    loader = FundCsvDirectoryReportLoader(config)
-    results = loader.execute()
-    return results
+from reports.recon import EquityPriceReconReportGenerator
+from test import load_spec_from_csv, load_test_fund_report_data, test_db_path
 
 
 def test_e2e_can_generate_recon_report(request):
