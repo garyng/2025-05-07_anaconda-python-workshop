@@ -1,0 +1,13 @@
+{
+    "FundNameMappings": {
+        "mend-report Wallington": "Wallington",
+        "Fund Whitestone": "Whitestone",
+        "TT_monthly_Trustmind": "Trustmind",
+        "Report-of-Gohen": "Gohen",
+        "rpt-Catalysm": "Catalysm"
+    },
+    "FundReportsDirPath": "./data/external-funds/",
+    "RefDbConnectionString": "./db/testdb.sqlite",
+    "ReconReportOutputPath": "./output/recon.csv",
+    "TopFundReportOutputPath": "./output/top_fund.csv"
+}
