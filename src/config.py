@@ -5,6 +5,9 @@ from pydantic import BaseModel
 
 class AppConfig(BaseModel):
     FundNameMappings: dict[str, str]
+    FundReportsDirPath: str
+    RefDbConnectionString: str
+    ReconReportOutputPath: str
 
 
 def load_app_config() -> AppConfig:

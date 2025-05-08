@@ -4,6 +4,7 @@ import polars as pl
 
 test_data_dir_path = pathlib.Path.cwd() / "data" / "external-funds"
 specs_data_dir_path = pathlib.Path.cwd() / "test" / "specs"
+test_db_path = pathlib.Path.cwd() / "db" / "testdb.sqlite"
 
 
 def load_spec_from_csv(test_name):

@@ -16,7 +16,7 @@ T = TypeVar("T")
 
 class FundReportLoader(ABC, Generic[T]):
     @abstractmethod
-    def execute(self) -> Generic[T]:
+    def execute(self) -> T:
         pass
 
 

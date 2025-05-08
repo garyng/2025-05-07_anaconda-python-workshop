@@ -5,5 +5,8 @@
         "TT_monthly_Trustmind": "Trustmind",
         "Report-of-Gohen": "Gohen",
         "rpt-Catalysm": "Catalysm"
-    }
+    },
+    "FundReportsDirPath": "./data/external-funds/",
+    "RefDbConnectionString": "./db/testdb.sqlite",
+    "ReconReportOutputPath": "./output/recon.csv"
 }
